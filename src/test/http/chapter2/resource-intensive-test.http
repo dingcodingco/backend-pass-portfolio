@@ -1,0 +1,14 @@
+### 극단적인 CPU 사용 (재귀 피보나치)
+GET http://localhost:8080/api/chapter2/test/resource/cpu/recursive?n=45
+
+### 대규모 행렬 곱셈
+GET http://localhost:8080/api/chapter2/test/resource/cpu/matrix?size=2000
+
+### 메모리 누수 테스트
+GET http://localhost:8080/api/chapter2/test/resource/memory/leak?mbSize=100&arrayCount=50
+
+### 대량 문자열 생성
+GET http://localhost:8080/api/chapter2/test/resource/memory/string?iterations=5000&stringSize=50000
+
+### 복합 부하 테스트
+GET http://localhost:8080/api/chapter2/test/resource/combined?matrixSize=1000&mbSize=50&arrayCount=20

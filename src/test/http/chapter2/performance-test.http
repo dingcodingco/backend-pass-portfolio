@@ -1,0 +1,27 @@
+### 복잡한 검색 테스트 - 키워드만
+GET http://localhost:8080/api/chapter2/test/search/complex?keyword=테스트
+Content-Type: application/json
+
+### 복잡한 검색 테스트 - 키워드 + 카테고리
+GET http://localhost:8080/api/chapter2/test/search/complex?keyword=테스트&category=FREE
+Content-Type: application/json
+
+### 복잡한 검색 테스트 - 키워드 + 태그
+GET http://localhost:8080/api/chapter2/test/search/complex?keyword=테스트&tags=Spring&tags=Java
+Content-Type: application/json
+
+### 복잡한 검색 테스트 - 모든 조건 포함
+GET http://localhost:8080/api/chapter2/test/search/complex?keyword=테스트&category=FREE&tags=Spring&tags=Java&page=0&size=10
+Content-Type: application/json
+
+### 복잡한 검색 테스트 - 페이징 처리
+GET http://localhost:8080/api/chapter2/test/search/complex?keyword=테스트&page=1&size=5
+Content-Type: application/json
+
+### 복잡한 검색 테스트 - 태그만으로 검색
+GET http://localhost:8080/api/chapter2/test/search/complex?tags=Spring&tags=Java&tags=Backend
+Content-Type: application/json
+
+### 복잡한 검색 테스트 - 카테고리만으로 검색
+GET http://localhost:8080/api/chapter2/test/search/complex?category=TECH
+Content-Type: application/json 

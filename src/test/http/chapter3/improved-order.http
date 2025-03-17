@@ -1,0 +1,15 @@
+### 회원별 주문 통계
+GET http://localhost:8080/api/chapter3improved/orders/stats?minAmount=50000&page=0&size=20
+Content-Type: application/json
+
+### 회원별 주문 통계 (2페이지)
+GET http://localhost:8080/api/chapter3improved/orders/stats?minAmount=50000&page=1&size=20
+Content-Type: application/json
+
+### 개선된 주문 검색 API (복합 조건)
+GET http://localhost:8080/api/chapter3improved/orders/complex-search?startDate=2024-01-01T00:00:00&status=COMPLETED&minAmount=100000&page=0&size=20
+Content-Type: application/json
+
+### 개선된 주문번호 검색
+GET http://localhost:8080/api/chapter3improved/orders/search?orderNumber=ORD-00000001
+Content-Type: application/json

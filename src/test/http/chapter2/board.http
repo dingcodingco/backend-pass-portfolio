@@ -1,0 +1,60 @@
+### 게시글 생성 (태그 포함)
+POST http://localhost:8080/api/chapter2/boards
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "title": "테스트 게시글",
+  "content": "테스트 내용입니다.",
+  "category": "FREE",
+  "tags": ["Spring", "Java", "Backend"]
+}
+
+### 게시글 조회
+GET http://localhost:8080/api/chapter2/boards/1
+
+### 게시글 목록 조회 (전체)
+GET http://localhost:8080/api/chapter2/boards
+
+### 게시글 목록 조회 (전체)
+GET http://localhost:8080/api/chapter2/boards/boxing
+
+### 게시글 목록 조회 (카테고리별)
+GET http://localhost:8080/api/chapter2/boards?category=FREE&page=0&size=10
+
+### 게시글 수정 (태그 포함)
+PUT http://localhost:8080/api/chapter2/boards/1
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "title": "수정된 게시글",
+  "content": "수정된 내용입니다.",
+  "category": "FREE",
+  "tags": ["Spring", "JPA", "Backend"]
+}
+
+### 게시글 삭제
+DELETE http://localhost:8080/api/chapter2/boards/1
+Authorization: Bearer {{auth_token}}
+
+### 게시글 좋아요 토글
+POST http://localhost:8080/api/chapter2/boards/1/like
+Authorization: Bearer {{auth_token}}
+
+### 게시글에 태그 추가
+POST http://localhost:8080/api/chapter2/boards/1/tags
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+[
+  "Spring",
+  "Java",
+  "Backend"
+]
+
+### 게시글 검색
+GET http://localhost:8080/api/chapter2/boards/search?keyword=테스트&page=0&size=10
+
+### 태그로 게시글 검색
+GET http://localhost:8080/api/chapter2/boards/tags/Spring

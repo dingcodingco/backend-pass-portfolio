@@ -1,0 +1,22 @@
+### 회원 가입
+POST http://localhost:8080/api/chapter2/members/signup
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "nickname": "테스트유저"
+}
+
+### 로그인
+POST http://localhost:8080/api/chapter2/members/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### 회원 정보 조회
+GET http://localhost:8080/api/chapter2/members/me
+Authorization: Bearer {{auth_token}} 
