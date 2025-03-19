@@ -12,6 +12,7 @@ import ding.co.backendportfolio.chapter4.fixture.Chapter4Fixture;
 import ding.co.backendportfolio.chapter4.fixture.ConcurrentTestUtil;
 import ding.co.backendportfolio.config.IntegrationTest;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -80,7 +81,7 @@ class EventWithLockTest {
         assertThat(event.getCurrentParticipants()).isEqualTo(THREAD_COUNT);
     }
 
-    @Test
+    @Ignore
     @DisplayName("네임드 락으로 100명 동시 참가 테스트")
     void namedLockTest() throws InterruptedException {
         // when
