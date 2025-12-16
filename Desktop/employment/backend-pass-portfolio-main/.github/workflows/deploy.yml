@@ -2,64 +2,62 @@ name: Deploy to AWS
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ] # 코드가 main 브랜치에 푸시될 때 이 Workflow가 실행됨
 
 env:
-  AWS_REGION: ap-northeast-2
-  ECR_REPOSITORY: backend-portfolio
+  AWS_REGION: ap-northeast-2 # AWS 리전 (서울 리전)
+  ECR_REPOSITORY: backend-portfolio # ECR에 저장할 Docker 이미지의 저장소 이름
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # GitHub Actions가 실행될 환경 (Ubuntu 최신 버전)
 
     steps:
-    - uses: actions/checkout@v2
-    
-    - name: Set up JDK 17
-      uses: actions/setup-java@v2
-      with:
-        java-version: '17'
-        distribution: 'adopt'
+      - uses: actions/checkout@v2 # 현재 저장소의 코드를 가져옴
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17' # JDK 17을 사용
+          distribution: 'adopt' # AdoptOpenJDK 배포판 사용
 
-    - name: Build with Gradle
-      run: ./gradlew build
+      - name: Build with Gradle
+        run: ./gradlew build # Gradle을 사용하여 프로젝트 빌드
 
-    - name: Check jar output
-      run: ls -al build/libs
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }} # GitHub Secrets에 저장된 AWS 액세스 키 사용
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }} # GitHub Secrets에 저장된 AWS 시크릿 키 사용
+          aws-region: ${{ env.AWS_REGION }} # AWS 리전 설정
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-    
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-    
-    - name: Build and push Docker image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
-    
-    - name: Deploy to EC2 using SSM
-      env:
-        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      run: |
-        aws ssm send-command \
-          --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
-          --document-name "AWS-RunShellScript" \
-          --parameters '{
-            "commands": [
-              "docker stop portfolio-app || true",
-              "docker rm portfolio-app || true",
-              "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}",
-              "docker run -d --name portfolio-app -p 8080:8080 -e JAVA_OPTS=-Xmx256m -e SPRING_DATASOURCE_URL=jdbc:mysql://${{ secrets.RDS_ENDPOINT }}/portfolio?useSSL=false\\&serverTimezone=Asia/Seoul\\&allowPublicKeyRetrieval=true -e SPRING_DATASOURCE_PASSWORD=${{ secrets.RDS_PASSWORD }} '$REGISTRY'/'$ECR_REPOSITORY':'$GITHUB_SHA'"
-            ]
-          }'
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1 # AWS ECR에 로그인
+
+      - name: Build and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }} # AWS ECR 레지스트리 주소
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} . # Docker 이미지 빌드
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} # 빌드된 이미지를 AWS ECR에 업로드
+
+      - name: Deploy to EC2 using SSM
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }} # AWS ECR 레지스트리 주소
+        run: |
+          aws ssm send-command \ # AWS Systems Manager(SSM)를 사용해 EC2에서 명령어 실행
+            --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \ # 대상 EC2 인스턴스 ID
+            --document-name "AWS-RunShellScript" \ # EC2에서 실행할 명령어를 지정하는 AWS 문서
+            --parameters '{
+              "commands": [
+                "docker stop portfolio-app || true", # 기존 실행 중인 컨테이너 중지 (없으면 무시)
+                "docker rm portfolio-app || true", # 기존 컨테이너 삭제 (없으면 무시)
+                "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}", # ECR 로그인
+                "docker run -d --name portfolio-app -p 8080:8080 \ # 새로운 컨테이너 실행
+                  -e JAVA_OPTS=-Xmx256m \ # JVM 메모리 옵션 설정 (최대 256MB)
+                  -e SPRING_DATASOURCE_URL=jdbc:mysql://${{ secrets.RDS_ENDPOINT }}/portfolio?useSSL=false\\&serverTimezone=Asia/Seoul\\&allowPublicKeyRetrieval=true \ # DB 연결 설정
+                  -e SPRING_DATASOURCE_PASSWORD=${{ secrets.RDS_PASSWORD }} \ # DB 비밀번호 설정
+                  '$REGISTRY'/'$ECR_REPOSITORY':'$GITHUB_SHA'"
+              ]
+            }'
