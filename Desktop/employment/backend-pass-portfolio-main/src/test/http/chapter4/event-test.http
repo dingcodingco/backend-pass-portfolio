@@ -1,0 +1,7 @@
+### 낙관적 락으로 이벤트 참가
+POST http://localhost:8080/api/chapter4/events/1/join/optimistic
+Authorization: Bearer {{auth_token}}
+
+### 비관적 락으로 이벤트 참가
+POST http://localhost:8080/api/chapter4/events/1/join/pessimistic
+Authorization: Bearer {{auth_token}} 

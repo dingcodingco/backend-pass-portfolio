@@ -1,0 +1,11 @@
+### 문자열 연결 테스트
+GET http://localhost:8080/api/chapter2/test/algorithm/string/concat?iterations=50000
+
+### 컬렉션 순회 테스트
+GET http://localhost:8080/api/chapter2/test/algorithm/collection/iteration?size=1000000
+
+### 스트림 병렬 처리 테스트
+GET http://localhost:8080/api/chapter2/test/algorithm/stream/parallel?size=1000000
+
+### 정규식 컴파일 테스트
+GET http://localhost:8080/api/chapter2/test/algorithm/regex/compilation?iterations=100000

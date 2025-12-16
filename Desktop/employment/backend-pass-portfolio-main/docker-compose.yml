@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: db
+    environment:
+      MYSQL_DATABASE: portfolio
+      MYSQL_USER: portfolio_user
+      MYSQL_PASSWORD: portfolio1234
+      MYSQL_ROOT_PASSWORD: portfolio1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - monitoring
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "portfolio_user", "--password=portfolio1234" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s  # 컨테이너 시작 후 30초 동안은 실패를 무시
+    deploy:
+      resources:
+        limits:
+          cpus: "2"  # 최대 2개의 코어 할당
+          memory: 2GB   # 최대 2GB 메모리 할당
+
+  app:
+    build: .
+    container_name: spring-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/portfolio?allowPublicKeyRetrieval=true&useSSL=false&rewriteBatchedStatements=true
+      JAVA_OPTS: "-Xms256m -Xmx512m"  # JVM 힙 메모리 제한
+    deploy:
+      resources:
+        limits:
+          cpus: '2'    # CPU 2코어로 제한
+          memory: 1G   # 전체 메모리 1GB로 제한
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    depends_on:
+      db:
+        condition: service_healthy  # MySQL의 health check가 성공할 때까지 대기
+      redis:
+        condition: service_started  # Redis가 시작되면 바로 시작
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - monitoring
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - monitoring
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # Redis
+  redis:
+    image: redis:7.0
+    container_name: redis-server
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - monitoring
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+
+  # Redis Exporter
+  redis_exporter:
+    image: oliver006/redis_exporter
+    container_name: redis_exporter
+    ports:
+      - "9121:9121"
+    command:
+      - '--redis.addr=redis://redis:6379'
+    depends_on:
+      - redis
+    networks:
+      - monitoring
+
+volumes:
+  mysql_data:
+  grafana_data:
+  redis_data:
+
+networks:
+  monitoring:

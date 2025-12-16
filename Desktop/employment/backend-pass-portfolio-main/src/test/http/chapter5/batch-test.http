@@ -1,0 +1,3 @@
+### 배치 인서트
+POST http://localhost:8080/batch
+Authorization: Bearer {{auth_token}}
