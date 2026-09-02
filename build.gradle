@@ -40,9 +40,9 @@ dependencies {
     testImplementation 'org.openjdk.jmh:jmh-core:1.37'
     testAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 
-    testImplementation 'org.testcontainers:testcontainers:1.19.6'
-    testImplementation 'org.testcontainers:junit-jupiter:1.19.6'
-    testImplementation 'org.testcontainers:mysql:1.19.6'
+    testImplementation 'org.testcontainers:testcontainers:1.21.4'
+    testImplementation 'org.testcontainers:junit-jupiter:1.21.4'
+    testImplementation 'org.testcontainers:mysql:1.21.4'
     
     // 테스트에서 Lombok 사용을 위한 의존성 추가
     testCompileOnly 'org.projectlombok:lombok'
